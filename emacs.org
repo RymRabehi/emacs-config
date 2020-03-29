@@ -9,6 +9,7 @@
 
 #+end_src
 
+
 * General Configuration
 ** Appearance
 *** General
@@ -52,13 +53,419 @@
 
     #+END_SRC
 
-*** Fonts
-
-   I use Monospace font.
-   #+begin_src emacs-lisp
-    (set-default-font "DejaVu Sans Mono")
-    (set-frame-font "DejaVu Sans Mono")
-    (set-face-attribute 'default nil :family "DejaVu Sans Mono" :height 140)
-   #+end_src
-
 *** Themes
+
+    I load some custom themes and i display my theme only in graphic mode
+    #+begin_src emacs-lisp
+      (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
+
+      (if (display-graphic-p)
+          (load-theme 'clues t))
+    #+end_src
+
+** General
+
+   Answer y or n and not yes/no
+   #+BEGIN_SRC emacs-lisp
+     (fset 'yes-or-no-p 'y-or-n-p)
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+     (add-hook 'text-mode-hook 'visual-line-mode)
+   #+END_SRC
+
+*** Encoding
+
+
+    utf-8  by default
+
+    #+begin_src emacs-lisp
+      (set-terminal-coding-system 'utf-8)
+      (set-keyboard-coding-system 'utf-8)
+      (set-language-environment "UTF-8")
+      (prefer-coding-system 'utf-8)
+    #+end_src
+
+*** Completion
+    #+begin_src emacs-lisp
+    (autoload 'bash-completion-dynamic-complete
+    "bash-completion"
+    "BASH completion hook")
+    (add-hook 'shell-dynamic-complete-functions
+	  'bash-completion-dynamic-complete)
+    #+end_src
+*** Backup files
+
+    #+begin_src emacs-lisp
+      (setq make-backup-files nil)
+    #+end_src
+
+    Now that all the temporary files are out of the way, we can keep more of them.
+
+    #+begin_src emacs-lisp
+      (setq delete-old-versions t
+            kept-new-versions 6
+            kept-old-versions 2
+            version-control t)
+    #+end_src
+
+*** Buffers
+
+    Non unique buffers name ? uniquify adds the parent path to the buffer name
+    #+begin_src emacs-lisp
+      (use-package uniquify)
+      (setq uniquify-buffer-name-style 'forward)
+    #+end_src
+
+*** Formatting
+
+    space instead of tabs
+    #+begin_src emacs-lisp
+       (setq-default indent-tabs-mode nil)
+       (defcustom indent-sensitive-modes
+         '(coffee-mode python-mode haml-mode yaml-mode)
+         "Modes for which auto-indenting is suppressed."
+         :type 'list)
+    #+end_src
+
+
+#+BEGIN_SRC emacs-lisp
+  (defun smarter-move-beginning-of-line (arg)
+    "Move point back to indentation of beginning of line.
+
+  Move point to the first non-whitespace character on this line.
+  If point is already there, move to the beginning of the line.
+  Effectively toggle between the first non-whitespace character and
+  the beginning of the line.
+
+  If ARG is not nil or 1, move forward ARG - 1 lines first.  If
+  point reaches the beginning or end of the buffer, stop there."
+    (interactive "^p")
+    (setq arg (or arg 1))
+
+    ;; Move lines first
+    (when (/= arg 1)
+      (let ((line-move-visual nil))
+        (forward-line (1- arg))))
+
+    (let ((orig-point (point)))
+      (back-to-indentation)
+      (when (= orig-point (point))
+        (move-beginning-of-line 1))))
+
+  ;; remap C-a to `smarter-move-beginning-of-line'
+  (global-set-key [remap move-beginning-of-line]
+                  'smarter-move-beginning-of-line)
+#+END_SRC
+
+*** Async
+
+    =async.el= is a module for doing asynchronous processing in
+    Emacs. Let's load it as it's gonna be useful. Let's also load
+    =dired-async= for the copy & co to be run asynchroniously (very
+    useful with TRAMP).
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package async
+        :ensure t)
+      (use-package dired-async
+        :init
+        (dired-async-mode 1))
+    #+END_SRC
+
+*** Dired
+
+    #+BEGIN_SRC emacs-lisp
+
+      (use-package dired-x)
+      (use-package dired-aux)
+
+      (setq dired-listing-switches "-laGh1v --group-directories-first")
+
+
+    #+END_SRC
+
+*** Zoom
+
+    #+BEGIN_SRC emacs-lisp
+      (global-set-key (kbd "C-+") 'text-scale-increase)
+      (global-set-key (kbd "C--") 'text-scale-decrease)
+    #+END_SRC
+
+*** Scrolling
+    ensure that =M-v= always undoes =C-v=, so you can go back exactly.
+
+    #+BEGIN_SRC emacs-lisp
+      (setq scroll-preserve-screen-position 'always)
+    #+END_SRC
+
+*** Ace windows
+
+    #+BEGIN_SRC emacs-lisp
+      (global-set-key (kbd "S-C-<right>") 'shrink-window-horizontally)
+      (global-set-key (kbd "S-C-<left>") 'enlarge-window-horizontally)
+      (global-set-key (kbd "S-C-<down>") 'enlarge-window)
+      (global-set-key (kbd "S-C-<up>") 'shrink-window)
+    #+END_SRC
+
+*** Ace Jump
+
+    Jump to char with ace jump
+    #+BEGIN_SRC emacs-lisp
+      (use-package ace-jump-mode
+        :ensure t
+        :commands ace-jump-mode
+        :bind ("C-x j" . ace-jump-mode))
+    #+END_SRC
+
+*** Highlight indentation
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package highlight-indentation
+        :ensure t
+        :commands (highlight-indentation-mode highlight-indentation-current-column-mode)
+        :config
+        (progn
+          (set-face-background 'highlight-indentation-face "#003308")
+          (set-face-background 'highlight-indentation-current-column-face "#003308")))
+    #+END_SRC
+
+*** Flycheck
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package flycheck
+        :ensure t
+        :config (global-flycheck-mode))
+    #+END_SRC
+
+* Other modes
+** Helm
+
+    #+BEGIN_QUOTE
+    Helm is incremental completion and selection narrowing framework for Emacs. It will help steer you in the right direction when you’re looking for stuff in Emacs (like buffers, files, etc).
+
+    Helm is a fork of anything.el originaly written by Tamas Patrovic and can be considered to be its successor. Helm sets out to clean up the legacy code in anything.el and provide a cleaner, leaner and more modular tool, that’s not tied in the trap of backward compatibility.
+    #+END_QUOTE
+
+    By default the /completion/ on the selected line is done by =C-z=
+    (the function is =helm-execute-persistent-action=) and =Tab= is
+    used for showing action you can do on it. Let's invert them as
+    =Tab= is used for completion in other tools (shells for example).
+
+    Let's define that all helm commands will be prefixed by =C-h=,
+    =C-h x= will be =Helm M-x=.
+
+    #+begin_src emacs-lisp
+      (use-package helm
+        :ensure t
+        :config
+        (progn
+          (require 'helm-config)
+          (setq helm-idle-delay 0.01
+                helm-input-idle-delay 0.01
+                helm-buffer-max-length 40
+                helm-M-x-always-save-history t
+                helm-move-to-line-cycle-in-source t
+                helm-ff-file-name-history-use-recentf t
+                ;; Enable fuzzy matching
+                helm-M-x-fuzzy-match t
+                helm-buffers-fuzzy-matching t
+                helm-recentf-fuzzy-match t)
+          (add-to-list 'helm-sources-using-default-as-input 'helm-source-man-pages)
+          ;; Rebind actions
+          (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action)
+          (define-key helm-map (kbd "C-i") 'helm-execute-persistent-action)
+          (define-key helm-map (kbd "C-z") 'helm-select-action)
+          (helm-autoresize-mode t)
+          (helm-mode 1))
+        :bind (("C-c h" . helm-command-prefix)
+               ("C-x C-f" . helm-find-files)
+               ("M-x" . helm-M-x)
+               ("C-c b" . helm-mini)
+               ("C-x C-b" . helm-buffers-list)
+               ("M-y" . helm-show-kill-ring)
+               ("C-x c o" . helm-occur)))
+      ;; (add-to-list 'helm-completing-read-handlers-alist '(org-refile)) ; helm-mode does not do org-refile well
+      ;; (add-to-list 'helm-completing-read-handlers-alist '(org-agenda-refile)) ; same goes for org-agenda-refile
+    #+end_src
+
+    Because it can be hard to remember all keybindings, let's use
+    =helm-descbinds=.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package helm-descbinds
+        :ensure t
+        :defer t
+        :bind ("C-h b" . helm-descbinds))
+    #+END_SRC
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package helm-gtags
+        :ensure t)
+      ;; (helm-gtags-mode 1)
+    #+END_SRC
+
+** company mode
+   #+BEGIN_QUOTE
+   company mode
+   #+END_QUOTE
+
+   #+BEGIN_SRC emacs-lisp
+   (use-package company
+       :ensure t)
+   (require 'company)
+   (global-company-mode)
+   (global-set-key (kbd "TAB") #'company-indent-or-complete-common)
+
+   #+END_SRC
+
+** Version control integration
+*** Git
+    #+begin_src emacs-lisp
+      (use-package gitignore-mode
+        :ensure t)
+      (use-package gitconfig-mode
+        :ensure t)
+      (use-package gitattributes-mode
+        :ensure t)
+    #+end_src
+
+**** magit
+
+     #+begin_src emacs-lisp
+       (use-package magit
+         :ensure t
+         :bind ("C-c g" . magit-status))
+     #+end_src
+
+** Projectile
+
+   #+BEGIN_QUOTE
+   Projectile is a project interaction library for Emacs. Its goal is
+   to provide a nice set of features operating on a project level
+   without introducing external dependencies(when feasible). For
+   instance - finding project files has a portable implementation
+   written in pure Emacs Lisp without the use of GNU find (but for
+   performance sake an indexing mechanism backed by external commands
+   exists as well).
+   #+END_QUOTE
+
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package projectile
+       :ensure t
+       :init (setq projectile-keymap-prefix (kbd "C-c p"))
+       :config
+       (progn
+         (setq projectile-completion-system 'default)
+         (setq projectile-enable-caching nil)
+         (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
+         (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+         (projectile-global-mode)))
+   #+END_SRC
+
+   And let's use the helm integration too.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package helm-projectile
+       :ensure t
+       :config (helm-projectile-on))
+   #+END_SRC
+* Languages
+** Lua
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package lua-mode
+       :ensure t)
+   #+END_SRC
+
+** Markdown, Yaml & Toml
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package markdown-mode
+       :ensure t)
+     (use-package markdown-mode+
+       :ensure t)
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package yaml-mode
+       :ensure t)
+   #+END_SRC
+
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package toml-mode
+       :ensure t)
+   #+END_SRC
+
+** Docker
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package dockerfile-mode
+       :ensure t)
+   #+END_SRC
+
+** Go
+
+Add go-mode
+#+BEGIN_SRC emacs-lisp
+
+  ;; this is from https://github.com/vincentbernat/dot.emacs
+
+  (setenv "GOPATH" "/home/rym/go")
+
+  (setenv "PATH" (concat (getenv "PATH") ":/home/rym/go/bin:/usr/local/go/bin"))
+  (setq exec-path (append exec-path '("/home/rym/go/bin")))
+  (setq exec-path (append exec-path '("/usr/local/go/bin")))
+
+  (use-package go-mode
+    :ensure t)
+
+  (setq flycheck-global-modes t)
+#+END_SRC
+
+And some extra packages
+
+#+BEGIN_SRC emacs-lisp
+
+  (use-package company-go
+    :ensure t
+    :config (add-to-list 'company-backends 'company-go))
+
+  (use-package gotest
+    :ensure t
+    :init
+    (bind-key "C-c r" 'go-run go-mode-map)
+    (bind-key "C-c t C-g a" 'go-test-current-project go-mode-map)
+    (bind-key "C-c t m" 'go-test-current-file go-mode-map)
+    (bind-key "C-c t ." 'go-test-current-test go-mode-map)
+    (bind-key "C-c t c" 'go-test-current-coverage go-mode-map)
+    (bind-key "C-c t b" 'go-test-current-benchmark go-mode-map)
+    (bind-key "C-c t C-g b" 'go-test-current-project-benchmarks go-mode-map))
+
+  (use-package golint
+    :ensure t)
+
+  (setenv "PATH" (concat (getenv "PATH") ":/home/rym/go/bin"))
+  (setq exec-path (append exec-path '("/home/rym/go/bin")))
+
+  (setenv "PATH" (concat (getenv "PATH") ":/usr/local/go/bin/"))
+  (setq exec-path (append exec-path '("/usr/local/go/bin/")))
+
+#+END_SRC
+
+Setup the go-mode hook to activate gofmt on save and co.(copyright vdemeester ;))
+
+#+BEGIN_SRC emacs-lisp
+
+(defun my-go-mode-hook ()
+  (setq gofmt-command "gofmt")
+  (add-hook 'before-save-hook 'gofmt-before-save)
+  (if (not (string-match "go" compile-command))
+      (set (make-local-variable 'compile-command)
+           "go build -v && go test -v && go vet")))
+(add-hook 'go-mode-hook 'my-go-mode-hook)
+
+#+END_SRC
+
