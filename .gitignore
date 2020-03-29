@@ -1,0 +1,9 @@
+*
+
+!/lisp/setup-package.el
+!emacs.org
+!init.el
+!.gitignore
+!README.org
+!custom.el
+emacs.el

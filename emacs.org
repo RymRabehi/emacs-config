@@ -1,0 +1,64 @@
+#+TITLE: Rym rabehi emacs configuration
+#+AUTHOR: Rym Rabehi
+
+#+begin_src
+
+    .-----.--------.---.-.----.-----.
+    |  -__|        |  _  |  __|__ --|
+    |_____|__|__|__|___._|____|_____|
+
+#+end_src
+
+* General Configuration
+** Appearance
+*** General
+
+   Removing toolbar/menu/scrollbar...
+   #+begin_src emacs-lisp
+     (menu-bar-mode -1)
+     (tool-bar-mode -1)
+     (scroll-bar-mode -1)
+     (blink-cursor-mode -1)
+     (setq inhibit-splash-screen t)
+   #+end_src
+
+   #+BEGIN_SRC emacs-lisp
+     (line-number-mode 1)
+     (column-number-mode 1)
+     (global-hl-line-mode 1)
+   #+END_SRC
+
+   Limit font-lock-mode
+   #+BEGIN_SRC emacs-lisp
+     (setq font-lock-maximum-decoration 3)
+   #+END_SRC
+
+*** Fringe
+
+    Customize fringe
+
+    indicate-buffer-boundaries put arrows at the beginning/end of a buffer
+    indate-empty-lines indicate in the fringe the lines at the end of a buffer.
+    #+BEGIN_SRC emacs-lisp
+      (setq-default indicate-buffer-boundaries 'left)
+      (setq-default indicate-empty-lines +1)
+    #+END_SRC
+
+*** Whitespaces
+
+    I want to detect trailing whitespace quickly
+    #+BEGIN_SRC emacs-lisp
+      (setq-default show-trailing-whitespace t)
+
+    #+END_SRC
+
+*** Fonts
+
+   I use Monospace font.
+   #+begin_src emacs-lisp
+    (set-default-font "DejaVu Sans Mono")
+    (set-frame-font "DejaVu Sans Mono")
+    (set-face-attribute 'default nil :family "DejaVu Sans Mono" :height 140)
+   #+end_src
+
+*** Themes
