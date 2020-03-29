@@ -1,9 +1,8 @@
-*
+/*
 
-!/lisp/setup-package.el
+!lisp/
 !emacs.org
 !init.el
 !.gitignore
 !README.org
 !custom.el
-emacs.el
