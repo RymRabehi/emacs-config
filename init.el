@@ -1,5 +1,8 @@
-;; Bootstrap 'use-package
+;;; package --- Summary
+;;; Commentary:
+;;; Bootstrap 'use-package
 (require 'package)
+;;; Code:
 (setq package-enable-at-startup nil)
 
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
@@ -33,5 +36,3 @@
 (require 'ob-tangle)
 
 (org-babel-load-file "~/.emacs.d/emacs.org")
-
-
