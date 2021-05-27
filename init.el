@@ -1,10 +1,10 @@
 ;;; package --- Summary
 ;;; Commentary:
-;;; Bootstrap 'use-package
+;; Bootstrap 'use-package
 (require 'package)
 ;;; Code:
 (setq package-enable-at-startup nil)
-
+(setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
 
 (package-initialize)
@@ -36,3 +36,5 @@
 (require 'ob-tangle)
 
 (org-babel-load-file "~/.emacs.d/emacs.org")
+(provide 'init)
+;;; init.el ends here
