@@ -4,7 +4,7 @@
 (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/"))
 
 ;; add melpa and melpa-stable to package repos
-(add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/"))
+(add-to-list 'package-archives '("mela-stable" . "http://stable.melpa.org/packages/"))
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
 
 ;; elpy
